@@ -5,11 +5,13 @@
  * @author Andrei Tretyakov <andrei.tretyakov@gmail.com>
  */
 import { knex } from 'knex';
-import moment from 'moment';
 import Transport from 'winston-transport';
 import { callbackify } from 'util';
-
 import { handleCallback } from './helpers';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export enum ClientType {
   'mssql',
@@ -156,7 +158,7 @@ export class SqlTransport extends Transport {
         level,
         message,
         meta: JSON.stringify({ ...meta, ...defaultMeta }),
-        timestamp: moment().utc().toDate(),
+        timestamp: dayjs().utc().toDate(),
       };
 
       const logQuery = async (cb: (e: unknown) => void) => {
@@ -194,8 +196,8 @@ export class SqlTransport extends Transport {
 
     if (options.from && options.until) {
       query = query.whereBetween('timestamp', [
-        moment(options.from).utc().toDate(),
-        moment(options.until).utc().toDate(),
+        dayjs(options.from).utc().toDate(),
+        dayjs(options.until).utc().toDate(),
       ]);
     }
 
